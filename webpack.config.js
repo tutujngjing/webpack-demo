@@ -2,7 +2,8 @@ const path = require('path');
 const TestPlugin = require('./plugin/TestPlugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-const DllReferencePlugin = require('webpack/lib/DllReferencePlugin');
+const webpack = require('webpack');
+const  AddAssetHtmlPlugin  = require('add-asset-html-webpack-plugin')
 const os = require('os')
 const thread = os.cpus().length
 
@@ -81,14 +82,18 @@ module.exports = {
         new MiniCssExtractPlugin({
             filename: 'static/css/min.css'
         }),
-        new DllReferencePlugin({
-            context: __dirname, // 与DllPlugin中的那个context保持一致
+        new webpack.DllReferencePlugin({
+            // context: __dirname, // 与DllPlugin中的那个context保持一致
             /** 
                 下面这个地址对应webpack.dll.config.js中生成的那个json文件的路径
                 这样webpack打包时，会检测此文件中的映射，不会把存在映射的包打包进bundle.js
             **/
-            manifest: require('./dll/vendor-manifest.json')
+            manifest: path.resolve(__dirname, './dll/manifest.json')
         }),
+        new AddAssetHtmlPlugin({
+            filepath: path.resolve(__dirname, './dll/lodash.js'),
+            publicPath: './'
+        })
     ],
     // 开发服务器不会输出资源，是在内存中编译打包的
     devServer: {
